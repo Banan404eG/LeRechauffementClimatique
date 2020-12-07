@@ -12,21 +12,27 @@ import tk.exdeath.model.service.UserService;
 import java.util.Collections;
 
 @Controller
-public class UserListController {
+public class RegistrationController {
+
+    private final String PATH = "registration";
 
     @Autowired
     private UserService userService;
 
-    @GetMapping("/test")
+    @GetMapping("/registration")
     public String returnPage() {
-        return "test";
+        return PATH;
     }
 
-    @PostMapping("/test")
-    public String test(User user, Model model) {
-        user.setRoles(Collections.singleton(Role.USER));
-        userService.create(user);
-        model.addAttribute("users", userService.readAllUsers());
-        return "test";
+    @PostMapping("/registration")
+    public String registration(User user, Model model) {
+        try {
+            user.setRoles(Collections.singleton(Role.USER));
+            userService.create(user);
+            model.addAttribute("users", userService.readAllUsers());
+        } catch (Exception ex) {
+            model.addAttribute("Message", ex.getMessage());
+        }
+        return PATH;
     }
 }
