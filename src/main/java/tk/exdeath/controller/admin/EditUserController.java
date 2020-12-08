@@ -8,22 +8,25 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import tk.exdeath.model.entities.Role;
+import tk.exdeath.model.entities.User;
 import tk.exdeath.model.service.UserService;
 
 @Controller
-@RequestMapping("userList")
+@RequestMapping("editUser")
 @PreAuthorize("hasAuthority('ADMIN')")
-public class UserListController {
+public class EditUserController {
 
-    private final String PATH = "admin/userList";
+    private final String PATH = "admin/editUser";
 
     @Autowired
     private UserService userService;
 
     @GetMapping
-    public String returnPage(Model model) {
+    public String returnPage(@RequestParam String username, Model model) {
         try {
-            model.addAttribute("users", userService.readAllUsers());
+            model.addAttribute("user", userService.readUserByUsername(username));
+            model.addAttribute("roles", Role.values());
         } catch (Exception ex) {
             model.addAttribute("Message", ex.getMessage());
         }
@@ -31,15 +34,20 @@ public class UserListController {
     }
 
     @PostMapping
-    public String findByName(@RequestParam String username, Model model) {
+    public String updateUser(
+            @RequestParam String newUsername,
+            @RequestParam String username,
+            @RequestParam(name = "roles[]", required = false) String[] roles, Model model) {
         try {
-            if (username.equals("")) {
-                model.addAttribute("users", userService.readAllUsers());
-            }
-            model.addAttribute("users", userService.readUserByUsername(username));
+            User user = userService.readUserByUsername(username);
+            userService.updateUser(user, newUsername, roles);
+            model.addAttribute("Message", newUsername + " successfully updated");
+            model.addAttribute("user", user);
+            model.addAttribute("roles", Role.values());
         } catch (Exception ex) {
             model.addAttribute("Message", ex.getMessage());
         }
         return PATH;
     }
+
 }

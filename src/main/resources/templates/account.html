@@ -4,8 +4,10 @@
     <title> Account </title>
 </head>
 <body>
-<h1 th:inline="text">Hello, [[${#httpServletRequest.remoteUser}]]!</h1>
-<a href="userList"> User List </a>
+<h1 th:text="'Hello, ' + ${user}"></h1>
+<div th:if="${admin}">
+    <a href="userList"> User List </a> <br> <br>
+</div>
 <form th:action="@{/logout}" method="post">
     <input type="submit" value="Sign Out"/>
 </form>

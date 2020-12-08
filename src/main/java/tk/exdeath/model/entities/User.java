@@ -14,7 +14,7 @@ public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    private Long id;
     @NotBlank(message = "Username can't be null")
     private String username;
     @NotBlank(message = "Password can't be null")
@@ -50,24 +50,12 @@ public class User implements UserDetails {
         return active;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
     public Set<Role> getRoles() {
         return roles;
     }
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getUsername() {

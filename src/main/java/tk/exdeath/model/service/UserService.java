@@ -9,11 +9,21 @@ import tk.exdeath.model.entities.Role;
 import tk.exdeath.model.entities.User;
 import tk.exdeath.model.repos.UserRepo;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 @Service
 public class UserService implements UserDetailsService {
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepo.readByUsername(username);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+        return user;
+    }
 
     @Autowired
     private UserRepo userRepo;
@@ -42,12 +52,20 @@ public class UserService implements UserDetailsService {
         return userRepo.findAll();
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public User readUserByUsername(String username) {
         User user = userRepo.readByUsername(username);
         if (user == null) {
             throw new UsernameNotFoundException("User not found");
         }
         return user;
+    }
+
+    public void updateUser(User user, String username, String[] roles) {
+        user.setUsername(username);
+        user.getRoles().clear();
+        if (roles != null) {
+            Arrays.stream(roles).forEach(r -> user.getRoles().add(Role.valueOf(r)));
+        }
+        userRepo.save(user);
     }
 }

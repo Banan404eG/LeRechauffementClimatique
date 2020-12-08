@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import tk.exdeath.model.entities.Role;
 import tk.exdeath.model.entities.User;
 import tk.exdeath.model.service.UserService;
@@ -12,6 +13,7 @@ import tk.exdeath.model.service.UserService;
 import java.util.Collections;
 
 @Controller
+@RequestMapping("registration")
 public class RegistrationController {
 
     private final String PATH = "registration";
@@ -19,12 +21,12 @@ public class RegistrationController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/registration")
+    @GetMapping
     public String returnPage() {
         return PATH;
     }
 
-    @PostMapping("/registration")
+    @PostMapping
     public String registration(User user, Model model) {
         try {
             user.setRoles(Collections.singleton(Role.USER));
