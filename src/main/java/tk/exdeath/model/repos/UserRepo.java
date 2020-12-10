@@ -6,4 +6,6 @@ import tk.exdeath.model.entities.User;
 public interface UserRepo extends JpaRepository<User, Long> {
 
     User readByUsername(String username);
+
+    User findByActivationCode(String code);
 }

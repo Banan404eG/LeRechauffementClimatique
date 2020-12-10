@@ -1,42 +1,29 @@
 package tk.exdeath.model.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import tk.exdeath.model.entities.Role;
 import tk.exdeath.model.entities.User;
 import tk.exdeath.model.repos.UserRepo;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class UserService implements UserDetailsService {
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepo.readByUsername(username);
-        if (user == null) {
-            throw new UsernameNotFoundException("User not found");
-        }
-        return user;
-    }
-
     @Autowired
     private UserRepo userRepo;
 
-    public void create(String username, String password, Set<Role> roles) {
-        if (username == null || password == null) {
-            throw new RuntimeException("Login and password can't be null");
-        }
-        if (userRepo.readByUsername(username) != null) {
-            throw new RuntimeException("User with same username already exist");
-        }
-        userRepo.save(new User(username, password, roles));
-    }
+    @Autowired
+    private MailSender mailSender;
+
+    @Value("${hostname}")
+    private String hostname;
 
     public void create(User user) {
         if (user == null || user.getUsername() == null || user.getPassword() == null) {
@@ -45,7 +32,18 @@ public class UserService implements UserDetailsService {
         if (userRepo.readByUsername(user.getUsername()) != null) {
             throw new RuntimeException("User with same login already exist");
         }
+        if (StringUtils.isEmpty(user.getEmail())) {
+            throw new RuntimeException("Email can't be null");
+        }
+
+        user.setActivationCode(UUID.randomUUID().toString());
+        user.setRoles(Collections.singleton(Role.USER));
         userRepo.save(user);
+
+        mailSender.sendMessage(user.getEmail(), "Activation code",
+                "Hello, " + user.getUsername()
+                        + "\n To activate your account, please follow the link: "
+                        + "http://" + hostname + "/activate/" + user.getActivationCode());
     }
 
     public List<User> readAllUsers() {
@@ -67,5 +65,24 @@ public class UserService implements UserDetailsService {
             Arrays.stream(roles).forEach(r -> user.getRoles().add(Role.valueOf(r)));
         }
         userRepo.save(user);
+    }
+
+    public void activateUser(String code) {
+        User user = userRepo.findByActivationCode(code);
+        if (user == null) {
+            throw new RuntimeException("Activation code is incorrect");
+        }
+        user.setActivationCode(null);
+        user.setActive(true);
+        userRepo.save(user);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepo.readByUsername(username);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+        return user;
     }
 }
