@@ -34,9 +34,7 @@ public class User implements UserDetails {
     public User() {
     }
 
-    public User(@NotBlank(message = "Username can't be null") String username,
-                @NotBlank(message = "Password can't be null") String password,
-                Set<Role> roles) {
+    public User(String username, String password, Set<Role> roles) {
         this.username = username;
         this.password = password;
         this.roles = roles;
@@ -123,5 +121,9 @@ public class User implements UserDetails {
 
     public void setActivationCode(String activationCode) {
         this.activationCode = activationCode;
+    }
+
+    public boolean isAdmin() {
+        return this.getRoles().contains(Role.ADMIN);
     }
 }

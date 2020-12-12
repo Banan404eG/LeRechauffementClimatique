@@ -32,6 +32,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     .loginPage("/login")
                     .permitAll()
                 .and()
+                    .rememberMe().key("SecretKey").tokenValiditySeconds(86400)
+                .and()
                     .logout()
                     .permitAll();
     }

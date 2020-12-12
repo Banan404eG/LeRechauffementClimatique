@@ -12,7 +12,10 @@ import tk.exdeath.model.entities.Role;
 import tk.exdeath.model.entities.User;
 import tk.exdeath.model.repos.UserRepo;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -40,15 +43,10 @@ public class UserService implements UserDetailsService {
             throw new RuntimeException("Email can't be null");
         }
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setActivationCode(UUID.randomUUID().toString());
         user.setRoles(Collections.singleton(Role.USER));
+        passwordEncoding(user);
+        emailActivation(user);
         userRepo.save(user);
-
-        mailSender.sendMessage(user.getEmail(), "Activation code",
-                "Hello, " + user.getUsername()
-                        + "\n To activate your account, please follow the link: "
-                        + "http://" + hostname + "/activate/" + user.getActivationCode());
     }
 
     public List<User> readAllUsers() {
@@ -72,6 +70,19 @@ public class UserService implements UserDetailsService {
         userRepo.save(user);
     }
 
+    public void updateUser(String username, String password, String email) {
+        User user = userRepo.readByUsername(username);
+        if (!StringUtils.isEmpty(password)) {
+            user.setPassword(password);
+            this.passwordEncoding(user);
+        }
+        if (!StringUtils.isEmpty(email)) {
+            user.setEmail(email);
+            this.emailActivation(user);
+        }
+        userRepo.save(user);
+    }
+
     public void activateUser(String code) {
         User user = userRepo.findByActivationCode(code);
         if (user == null) {
@@ -80,6 +91,20 @@ public class UserService implements UserDetailsService {
         user.setActivationCode(null);
         user.setActive(true);
         userRepo.save(user);
+    }
+
+    private void passwordEncoding(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+    }
+
+    private void emailActivation(User user) {
+        user.setActive(false);
+        user.setActivationCode(UUID.randomUUID().toString());
+
+        mailSender.sendMessage(user.getEmail(), "Activation code",
+                "Hello, " + user.getUsername()
+                        + "\n To activate your account, please follow the link: "
+                        + "http://" + hostname + "/activate/" + user.getActivationCode());
     }
 
     @Override

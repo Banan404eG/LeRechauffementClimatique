@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import tk.exdeath.model.service.UserService;
+import tk.exdeath.model.service.admin.UserList;
 
 @Controller
 @RequestMapping("userList")
@@ -18,12 +18,12 @@ public class UserListController {
     private final String PATH = "admin/userList";
 
     @Autowired
-    private UserService userService;
+    private UserList userList;
 
     @GetMapping
     public String returnPage(Model model) {
         try {
-            model.addAttribute("users", userService.readAllUsers());
+            model.addAttribute("users", userList.getAllUsers());
         } catch (Exception ex) {
             model.addAttribute("Message", ex.getMessage());
         }
@@ -33,10 +33,7 @@ public class UserListController {
     @PostMapping
     public String findByName(@RequestParam String username, Model model) {
         try {
-            if (username.equals("")) {
-                model.addAttribute("users", userService.readAllUsers());
-            }
-            model.addAttribute("users", userService.readUserByUsername(username));
+            model.addAttribute("users", userList.getUserByUsername(username));
         } catch (Exception ex) {
             model.addAttribute("Message", ex.getMessage());
         }

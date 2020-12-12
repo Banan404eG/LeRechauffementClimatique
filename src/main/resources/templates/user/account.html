@@ -4,10 +4,11 @@
     <title> Account </title>
 </head>
 <body>
-<h1 th:text="'Hello, ' + ${user}"></h1>
-<div th:if="${admin}">
+<h1 th:text="'Hello, ' + ${username}"></h1>
+<div th:if="${isAdmin}">
     <a href="userList"> User List </a> <br> <br>
 </div>
+<a href="editAccount"> Edit Account</a>
 <form th:action="@{/logout}" method="post">
     <input type="submit" value="Sign Out"/>
 </form>

@@ -8,9 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import tk.exdeath.model.entities.Role;
-import tk.exdeath.model.entities.User;
-import tk.exdeath.model.service.UserService;
+import tk.exdeath.model.service.admin.EditUser;
 
 @Controller
 @RequestMapping("editUser")
@@ -20,13 +18,13 @@ public class EditUserController {
     private final String PATH = "admin/editUser";
 
     @Autowired
-    private UserService userService;
+    private EditUser editUser;
 
     @GetMapping
     public String returnPage(@RequestParam String username, Model model) {
         try {
-            model.addAttribute("user", userService.readUserByUsername(username));
-            model.addAttribute("roles", Role.values());
+            model.addAttribute("user", editUser.getUserByUsername(username));
+            model.addAttribute("roles", editUser.getAllRoles());
         } catch (Exception ex) {
             model.addAttribute("Message", ex.getMessage());
         }
@@ -39,15 +37,13 @@ public class EditUserController {
             @RequestParam String username,
             @RequestParam(name = "roles[]", required = false) String[] roles, Model model) {
         try {
-            User user = userService.readUserByUsername(username);
-            userService.updateUser(user, newUsername, roles);
+            editUser.updateUser(username, newUsername, roles);
             model.addAttribute("Message", newUsername + " successfully updated");
-            model.addAttribute("user", user);
-            model.addAttribute("roles", Role.values());
+            model.addAttribute("user", editUser.getUserByUsername(newUsername));
+            model.addAttribute("roles", editUser.getAllRoles());
         } catch (Exception ex) {
             model.addAttribute("Message", ex.getMessage());
         }
         return PATH;
     }
-
 }
